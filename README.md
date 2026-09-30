@@ -22,9 +22,11 @@ IMU-Motion/
 ├── config.yaml
 ├── requirements.txt
 └── README.md
+```
 
 ## Repository Structure
 
+```text
 IMU-Motion/
 │
 ├── data/
@@ -42,20 +44,21 @@ IMU-Motion/
 ├── requirements.txt
 ├── LICENSE
 └── README.md
-
-1. notebooks/- Contains Jupyter notebooks used for data exploration and processing.
-2. DataProcessing.ipynb — main notebook for processing and visualizing the dataset.
-3. src/- Contains reusable Python functions used by the notebook.
-4. data_loader.py — functions for loading sensor data.
-5. preprocess_data.py — preprocessing, trimming, timestamp synchronization, and resampling functions.
-6. visualisation.py — functions for plotting sensor signals and synchronization checkpoints.
-7. config.yaml- Contains dataset paths, session definitions, sensor folder names, and file naming conventions.
-8. requirements.txt- Contains the Python dependencies required to run the processing code.
+```
+1. `notebooks/`- Contains Jupyter notebooks used for data exploration and processing.
+2. `DataProcessing.ipynb` — main notebook for processing and visualizing the dataset.
+3. `src/`- Contains reusable Python functions used by the notebook.
+4. `data_loader.py` — functions for loading sensor data.
+5. `preprocess_data.py` — preprocessing, trimming, timestamp synchronization, and resampling functions.
+6. `visualisation.py` — functions for plotting sensor signals and synchronization checkpoints.
+7. `config.yaml`- Contains dataset paths, session definitions, sensor folder names, and file naming conventions.
+8. `requirements.txt`- Contains the Python dependencies required to run the processing code.
 
 ## Dataset Structure from Zenodo
 
 After downloading and extracting the dataset from Zenodo, the data is organized by subject and recording session.
 
+```text
 data/
 │
 ├── Subject_1_D/
@@ -69,11 +72,13 @@ data/
 └── Subject_3_I/
     ├── Session_1/
     └── Session_2/
+``` 
 
 ## Processing Pipeline
 
 The main processing workflow is:
 
+```text
 Raw Dataset
      │
      ├── Xsens IMU recordings
@@ -102,21 +107,22 @@ Processed Sensor Data
      │
      ▼
 Visualization and Analysis
+```
 
-The processing functions are implemented in src/ and called from: notebooks/DataProcessing.ipynb
+The processing functions are implemented in `src/` and called from: `notebooks/DataProcessing.ipynb`
 
 ## Configuration
 
-Dataset locations and processing-related file names are specified in: config.yaml
+Dataset locations and processing-related file names are specified in: `config.yaml`
 
 The configuration includes:
 
-Dataset directory
-Subject/session paths
-Sensor Logger directories
-Xsens directories
-Processed-data directories
-File naming conventions
+1. Dataset directory
+2. Subject/session paths
+3. Sensor Logger directories
+4. Xsens directories
+5. Processed-data directories
+6. File naming conventions
 
 Before running the notebook, make sure that the paths in config.yaml correspond to the location of the downloaded dataset.
 
@@ -124,24 +130,27 @@ Before running the notebook, make sure that the paths in config.yaml correspond 
 
 Clone the repository : 
 
+```text
 git clone <repository-url>
 cd IMU-Motion
-
+```
 Create and activate a Python environment, then install the required dependencies:
-
+```text
 pip install -r requirements.txt
-
+```
 ## Running the Processing Notebook
 
-After downloading the dataset from Zenodo and placing it in the expected data/ directory:
+After downloading the dataset from Zenodo and placing it in the expected `data/ directory`
 
 1. Open the repository in VS Code or Jupyter.
-2. Open: notebooks/DataProcessing.ipynb
+2. Open: `notebooks/DataProcessing.ipynb`
 
 3. Run the notebook cells sequentially.
 
 The notebook uses the reusable functions in:
+```text
 src/data_loader.py
 src/preprocess_data.py
 src/visualisation.py
+```
 
