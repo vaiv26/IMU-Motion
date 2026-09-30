@@ -1,0 +1,22 @@
+data_dir : "./data"
+
+sessions:
+  - "Subject_1_D/Session_1"
+  - "Subject_1_D/Session_2"
+  - "Subject_2_F/Session_1"
+  - "Subject_2_F/Session_2"
+  - "Subject_3_I/Session_1"
+  - "Subject_3_I/Session_2"
+
+
+sensor_logger:
+  folder: "Sensor_logger_recordings"
+  trimmed_folder: "trimmed"
+  trimmed_60Hz_folder: "trimmed_60Hz"
+  trimmed_file_prefix: "trimmed_TotalAcceleration"
+  file_prefix: "TotalAcceleration.csv"
+
+xsens_folder:
+  raw: "XSens_raw"
+  trimmed_folder: "XSens_trimmed"
+  file_prefix: "XSensData_Rome"
