@@ -6,72 +6,60 @@ from scipy.signal import resample_poly
 def get_start_end_time(df: pd.DataFrame, samples: np.int64) -> tuple[float, float]:
     # find two values in which acc_mag is higest [1st and second peak ]
     # Since we want to find from start and finish of the signal, we can look only in 150 seconds from start and end time
-    required_columns = ["time_s", "x", "y", "z"]
+    required_columns = ["time_s_normalized", "Acc_mag"]
     missing_columns = [column for column in required_columns
                        if column not in df.columns]
     if missing_columns:
         raise ValueError(f"Missing required columns: {missing_columns}")
     
-    time_start = df["time_s"].iloc[0]
-    time_end = df["time_s"].iloc[-1]
+    time_start = df["time_s_normalized"].iloc[0]
+    time_end = df["time_s_normalized"].iloc[-1]
     highest_acc_mag = 0
-    for i in range(samples):  # 10000 samples approx 120 seconds 
-        acc_mag = np.sqrt(df["x"].iloc[i]**2 + df["y"].iloc[i]**2 + df["z"].iloc[i]**2)
+    for i in range(samples):  
+        acc_mag = df["Acc_mag"].iloc[i]
         if acc_mag > highest_acc_mag:
             highest_acc_mag = acc_mag
-            time_start = df["time_s"].iloc[i]
+            time_start = df["time_s_normalized"].iloc[i]
 
     highest_acc_mag = 0
     for i in range(len(df) - samples, len(df)):
-        acc_mag = np.sqrt(df["x"].iloc[i]**2 + df["y"].iloc[i]**2 + df["z"].iloc[i]**2)
+        acc_mag = df["Acc_mag"].iloc[i]
         if acc_mag > highest_acc_mag:
             highest_acc_mag = acc_mag
-            time_end = df["time_s"].iloc[i]
+            time_end = df["time_s_normalized"].iloc[i]
     return time_start, time_end
 
-def get_start_end_Magnitude(df: pd.DataFrame) -> tuple[np.int64, np.int64]:
-    # find two values in which acc_mag is higest [1st and second peak ]
-    # Since we want to find from start and finish of the signal, we can look only in 150 seconds from start and end time
-    required_columns = ["Acc_mag"]
-    missing_columns = [column for column in required_columns
-                       if column not in df.columns]
-    if missing_columns:
-        raise ValueError(f"Missing required columns: {missing_columns}")
-    
-    row_start = 0
-    row_end = len(df) - 1
-    highest_acc_mag = 0
-    for i in range(9000):  # 9000 samples = 150 seconds at 60 Hz
-        acc_mag = df["Acc_mag"].iloc[i]
-        if acc_mag > highest_acc_mag:
-            highest_acc_mag = acc_mag
-            row_start = i
-
-    highest_acc_mag = 0
-    for i in range(len(df) - 9000, len(df)):
-        acc_mag = df["Acc_mag"].iloc[i]
-        if acc_mag > highest_acc_mag:
-            highest_acc_mag = acc_mag
-            row_end = i
-    highest_acc_mag_end = highest_acc_mag
-    return row_start, row_end
 
 def trim_signal_with_time(df: pd.DataFrame, t_start: float, t_end: float) -> pd.DataFrame:
         
-    required_columns = ["Time_s"]
+    required_columns = ["time_s_normalized"]
     missing_columns = [column for column in required_columns
                        if column not in df.columns]
     if missing_columns:
         raise ValueError(f"Missing required columns: {missing_columns}")
 
-    mask = (df["Time_s"] >= t_start) & (df["Time_s"] <= t_end)
+    mask = (df["time_s_normalized"] >= t_start) & (df["time_s_normalized"] <= t_end)
     return df.loc[mask].reset_index(drop=True)
 
-def trim_signal_with_idx(df: pd.DataFrame, start_idx: np.int64, end_idx: np.int64) -> pd.DataFrame:
-    return df.iloc[start_idx : end_idx + 1].reset_index(drop=True)
 
 def downsample_with_nanos(df: pd.DataFrame, time_col: str, signal_cols: list, target_fs=60) -> pd.DataFrame:
-    
+
+    # Reviewer Comment: Sensor Logger on Android does not always sample at a uniform rate, 
+    # while resample_poly assumes uniform samples. Please check timestamp jitter and interpolate first if needed.
+
+    t_raw = df[time_col].values
+    t0_nano = t_raw[0]
+    tend_nano = t_raw[-1]
+
+    # Create a uniform 100Hz timeline from start to finish
+    dt_100Hz = int(1e9/100)
+    uniform_100z_time = np.arange(t0_nano,tend_nano,dt_100Hz)
+
+    # Interpolate signal columns onto this clean uniform grid
+    uniform_data = {}
+    for col in signal_cols:
+        uniform_data[col] = np.interp(uniform_100z_time, t_raw, df[col].values)
+
     # 1. Compute anti-aliased polyphase resampling ratio (3/5 for 100Hz -> 60Hz)
     up = 3
     down = 5
@@ -79,12 +67,9 @@ def downsample_with_nanos(df: pd.DataFrame, time_col: str, signal_cols: list, ta
     # 2. Resample signal columns
     resampled_data = {}
     for col in signal_cols:
-        resampled_data[col] = resample_poly(df[col].values, up, down)
+        resampled_data[col] = resample_poly(uniform_data[col], up, down)
 
     num_samples = len(next(iter(resampled_data.values())))
-
-    # 3. Reconstruct absolute nanosecond timestamps from original t0
-    t0_nano = df[time_col].iloc[0]
 
     # Calculate step size in nanoseconds (1e9 ns / 60 Hz = 16_666_666.67 ns)
     ns_per_sample = 1e9 / target_fs

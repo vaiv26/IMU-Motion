@@ -1,11 +1,10 @@
-data_dir : "./data"
+data_dir : "./Data"
 
 sessions:
   - "Subject_1_D/Session_1"
   - "Subject_1_D/Session_2"
   - "Subject_2_F/Session_1"
   - "Subject_2_F/Session_2"
-  - "Subject_3_I/Session_1"
   - "Subject_3_I/Session_2"
 
 
