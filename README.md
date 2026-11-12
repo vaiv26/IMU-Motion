@@ -70,7 +70,6 @@ data/
 │   └── Session_2/
 │
 └── Subject_3_I/
-    ├── Session_1/
     └── Session_2/
 ``` 
 
