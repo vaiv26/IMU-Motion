@@ -41,6 +41,17 @@ def trim_signal_with_time(df: pd.DataFrame, t_start: float, t_end: float) -> pd.
     mask = (df["time_s_normalized"] >= t_start) & (df["time_s_normalized"] <= t_end)
     return df.loc[mask].reset_index(drop=True)
 
+def trim_signal_with_seconds_elapsed(df: pd.DataFrame, t_start: float, t_end: float) -> pd.DataFrame:
+        
+    required_columns = ["seconds_elapsed"]
+    missing_columns = [column for column in required_columns
+                       if column not in df.columns]
+    if missing_columns:
+        raise ValueError(f"Missing required columns: {missing_columns}")
+
+    mask = (df["seconds_elapsed"] >= t_start) & (df["seconds_elapsed"] <= t_end)
+    return df.loc[mask].reset_index(drop=True)
+
 
 def downsample_with_nanos(df: pd.DataFrame, time_col: str, signal_cols: list, target_fs=60) -> pd.DataFrame:
 

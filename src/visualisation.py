@@ -29,23 +29,29 @@ def plot_acceleration_magnitude_with_checkpoints(step_logger_df:pd.DataFrame, ti
 
     # Loop over each checkpoint in the step logger DataFrame
     for idx, row in step_logger_df.iterrows():
-        event_time =  round((row['time']/ 1e3),4)
+        event_time =  round((row['time_s_normalized']),4)
         checkpoint_label = str(row["Checkpoint"]).strip()
 
         # 1. Draw vertical event line
         line_label = "Sensor Logger Event" if idx == 0 else ""
-        plt.axvline(
-            x=event_time,
-            color="red",
-            linestyle="--",
-            alpha=0.6,
-            linewidth=1.2,
-            label=line_label,
-        )
+        plt.axvline(x=event_time, color="red", linestyle="--", alpha=0.6, linewidth=1.2, label=line_label,)
 
-    plt.xlabel("Time (ms)")
+    plt.xlabel("Time (s)")
     plt.ylabel("Acceleration ($m/s^2$)")
     plt.title(f"{title}")
     plt.legend(loc="upper right")
+    plt.tight_layout()
+    plt.show()
+
+def scatterplot_stepdetection(uniform_df:pd.DataFrame, peaks: NDArray[Any], filtered: NDArray[Any]):
+
+    plt.figure(figsize=(12, 4))
+    time = uniform_df["time_s_normalized"].to_numpy()
+    plt.plot(time, filtered, label="Filtered acceleration")
+    plt.scatter(time[peaks], filtered[peaks], color="red", s=12, label="Detected steps")
+
+    plt.xlabel("Time (s)")
+    plt.ylabel("Filtered acceleration ($m/s^2$)")
+    plt.legend()
     plt.tight_layout()
     plt.show()
