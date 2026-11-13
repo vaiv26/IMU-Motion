@@ -97,23 +97,3 @@ def downsample_with_nanos(df: pd.DataFrame, time_col: str, signal_cols: list, ta
 
     return out_df
 
-def add_timestamp(XSens_df: pd.DataFrame, sensor_logger_timestamp: np.int64) -> pd.DataFrame:
-    # 1. Target time step (1/60th of a second for 60 Hz)
-    dt_sec = 1.0 / 60.0
-    ns_per_packet = np.int64(1e9 // 60)
-
-    # 2. Ensure packet counter starts cleanly at 0
-    # Handle packet counter rollover if present
-    pc_raw = XSens_df["PacketCounter"].values
-    pc_diffs = np.diff(pc_raw, prepend=pc_raw[0])
-    pc_diffs[pc_diffs < 0] += 65536  # Unwrap 16-bit rollover
-    normalized_pc = np.cumsum(pc_diffs) - pc_diffs[0]
-
-    # 3. Calculate absolute 19-digit nanoseconds cleanly
-    XSens_df["timestamp_ns"] = sensor_logger_timestamp + (normalized_pc * ns_per_packet)
-
-    # 4. Calculate relative seconds directly from the normalized counter step
-    XSens_df["Normalized_time_secs"] = (normalized_pc * dt_sec).round(6)
-
-    return XSens_df
-
